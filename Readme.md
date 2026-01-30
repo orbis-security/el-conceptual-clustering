@@ -56,3 +56,17 @@ where `[number]` is the ID of the cluster, and indicates when it was created, `[
 2. Run the script "`./run_all_ore.sh`" to compute concept hierarchies for each ABox. This will create the ontologies together with a bunch of log files.
 3. To generate a CSV file with experimental results as was used for the paper, execute the script "`./analyze-log-files.py`".
 
+# Experimenting with EMBER2018-based PE Malware Datasets
+
+1. Get the datasets (almost 7.9 GiB):
+    ```bash
+    ./get-pe-malware-onto.sh
+    ```
+2. Run the clustering on all datasets of a given `SAMPLE_SIZE` (`1000`, `10000`, `100000`, `800000`) or, optionally, just selected `DATASET`s (`1` to `10`)*:
+
+    ```bash
+    ./run-pe-malware.sh MAX_DEPTH MAX_ITERATIONS TIMEOUT_MINUTES SAMPLE_SIZE [DATASET [DATASET …]]
+    ```
+
+    * <small>`[]` indicates optional arguments</small>
+
