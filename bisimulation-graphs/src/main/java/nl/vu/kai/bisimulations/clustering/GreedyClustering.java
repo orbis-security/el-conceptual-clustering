@@ -5,6 +5,8 @@ import nl.vu.kai.bisimulations.BisimulationGraphEvaluator;
 import nl.vu.kai.bisimulations.BisimulationNode;
 import nl.vu.kai.bisimulations.tools.Pair;
 
+import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 public class GreedyClustering implements ClusteringExtractor{
@@ -39,9 +41,15 @@ public class GreedyClustering implements ClusteringExtractor{
 
         double previousValue=-Double.MAX_VALUE;
 
+        System.out.println(formattedTime() + "- Initial clustering size: " + currentClustering.size());
+        System.out.print(formattedTime() + "- Building the relative utility matrix");
+        System.out.flush();
         Map<BisimulationNode, SortedSet<Pair<BisimulationNode,Double>>> comparisonMatrix = buildMatrix(currentClustering,evaluator);
-        SortedSet<Pair<BisimulationNode,Double>> currentRanking = extractRanking(comparisonMatrix,currentClustering);
+        System.out.println(" done");
 
+        System.out.print(formattedTime() + "- Computing ranking and removing the lowest relative utility clusters");
+
+        SortedSet<Pair<BisimulationNode,Double>> currentRanking = extractRanking(comparisonMatrix,currentClustering);
         BisimulationNode lastRemoved = null;
 
         double currentValue = evaluate(currentRanking,currentClustering);
@@ -49,17 +57,23 @@ public class GreedyClustering implements ClusteringExtractor{
         //System.out.println("Previous value: "+previousValue);
         //System.out.println("Current value: "+currentValue);
 
-        System.out.println(currentValue>previousValue);
-
         while((numberOfClusters.isEmpty() && currentValue>=previousValue) ||
                 (numberOfClusters.isPresent() && numberOfClusters.get()<=currentClustering.size())) {
 
             previousValue=currentValue;
 
+            if (currentRanking.isEmpty()) {
+                // The next statement will throw, this probably should not happen -- JKl
+                System.out.println();
+                System.out.println(formattedTime() + "- BUG: " + currentClustering.size() +
+                        " clusters remain, but the current ranking is empty");
+            }
+
             BisimulationNode weakest = currentRanking.first().getKey();
 
             //System.out.println("Remove now: "+weakest);
             //System.out.println("Worst relative utlity: "+currentRanking.first().getValue());
+            System.out.print(" " + currentValue);
 
             currentClustering.remove(weakest);
             lastRemoved=weakest;
@@ -71,6 +85,8 @@ public class GreedyClustering implements ClusteringExtractor{
 
         // Last node made things better, so we put it back in
         currentClustering.add(lastRemoved);
+        System.out.println();
+        System.out.println(formattedTime() + "- Done removing the lowest utility clusters");
 
         return currentClustering;
     }
@@ -117,9 +133,14 @@ public class GreedyClustering implements ClusteringExtractor{
                 }
             });
             matrix.put(node1,current);
+            System.out.print(".");
+            System.out.flush();
         });
         return matrix;
     }
 
+    private static String formattedTime() {
+        return "[" + ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "] ";
+    }
 
 }

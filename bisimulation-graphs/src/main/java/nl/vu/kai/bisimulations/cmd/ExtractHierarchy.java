@@ -14,6 +14,8 @@ import org.semanticweb.owlapi.model.parameters.Imports;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -68,6 +70,7 @@ public class ExtractHierarchy {
         //graph.restrictToMinSize(10);
         System.out.println("BOUNDED DEPTH NODES: "+graph.nodes().size());
 
+        System.out.println(formattedTime() + "Computing products");
         Products products = new Products();
         /*products.addAllProducts(graph);
         System.out.println("nodes now: "+graph.nodes().size());
@@ -79,32 +82,42 @@ public class ExtractHierarchy {
         System.out.println("nodes now: "+graph.nodes().size());
         */
         products.productsFixpoint(graph,iterations);
-        System.out.println("Done with the products");
+        System.out.println(formattedTime() + "Done with the products");
         System.out.println("PRODUCTS: "+graph.nodes().size());
         ToOWLConverter converter = new ToOWLConverter(manager);
         converter.setMaxDepth(maxDepth);
         OWLOntology ont2 = converter.convert(graph,ontology);
+
+        System.out.println(formattedTime() + "Initializing simulation graph evaluator");
         BisimulationGraphEvaluator evaluator = new BisimulationGraphEvaluator(graph,ont2);
+        System.out.println(formattedTime() + "Adding utilities to nodes");
         converter.addUtility2Label(ont2, graph, evaluator);
         //ontology.addAxioms(ont2.axioms());
 
+        System.out.println(formattedTime() + "Saving the simulation graph with utilities");
         manager.saveOntology(ont2, new FileOutputStream(new File("output.owl")));
 
         ManchesterOWLSyntaxOWLObjectRendererImpl renderer = new ManchesterOWLSyntaxOWLObjectRendererImpl();
 
+        System.out.println(formattedTime() + "Extracting clustering");
         GreedyClustering extractor = new GreedyClustering(); //new TopNClusters(5);
         extractor.setTargetSize(10);
         //ClusteringExtractor extractor = new TopNClusters(10);
         Collection<BisimulationNode> clustering = extractor.extractClustering(graph,evaluator);
         clustering.remove(null);
-        System.out.println("Number of clusters: "+clustering.size());
+        System.out.println(formattedTime() + "Number of clusters: "+clustering.size());
         /*clustering.stream()
                 .map(converter::convert)
                 .map(renderer::render)
                 .forEach(System.out::println);*/
         OWLOntology clusteringResult = converter.convert(clustering,ontology);
         converter.addUtility2Label(clusteringResult, graph, evaluator);
+        System.out.println(formattedTime() + "Saving the clustering");
         manager.saveOntology(clusteringResult, new FileOutputStream(new File("clustering-result.owl")));
 
+    }
+
+    private static String formattedTime() {
+        return "[" + ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "] ";
     }
 }
