@@ -51,7 +51,7 @@ done
 . ./settings.config
 
 # Turn relative paths absolute
-boost_path=$(realpath $boost_path)/
+boost_path="$(realpath $boost_path)/"
 
 # Handle the case if the directory does not exist
 if [ ! -d "$boost_path" ]; then
@@ -69,9 +69,9 @@ if [ ! -d "$boost_path" ]; then
       fi
     done
   fi
-  mkdir -p $boost_path
+  mkdir -p "$boost_path"
   (
-    cd $boost_path;
+    cd "$boost_path";
     pwd;
     wget https://archives.boost.io/release/1.88.0/source/boost_1_88_0.tar.gz;
     tar -v --strip-components=1 -xf ./boost_1_88_0.tar.gz;
@@ -126,7 +126,7 @@ if [ ! -d "${boost_path}bin.v2/" ] || [ ! -d "${boost_path}include/" ] || [ ! -d
     done
   fi
   (
-    cd $boost_path;
+    cd "$boost_path";
     ./bootstrap.sh --prefix=./;
     ./b2 install
   )
@@ -211,7 +211,7 @@ sed -i 's/\r//g' ./compile.sh
 chmod +x ./compile.sh
 
 # Compile the preprocessor
-compiler_flags="${compiler_flags//,/ }"
+compiler_flags="${compiler_flags//,/ } -I../external/boost/include"
 echo Copying preprocessor.cpp
 echo $(date) $(hostname) "${logging_process}.Info: Copying preprocessor.cpp" >> $log_file
 cp ../code/preprocessor.cpp ../$git_hash/code/src/preprocessor.cpp
@@ -252,7 +252,7 @@ echo Copying python codebase
 echo $(date) $(hostname) "${logging_process}.Info: Copying python codebase" >> $log_file
 cp -r ../code/python/ ../$git_hash/code/python/
 
-if [ using_conda ]; then
+if $using_conda; then
     echo Setting up Anaconda enviroment
     echo $(date) $(hostname) "${logging_process}.Info: Setting up Anaconda enviroment" >> $log_file
     (cd ../$git_hash/code/python/;
@@ -1195,7 +1195,7 @@ chmod +x $quotient_graphs_materializer
 
 # Set up a command for running with or without conda
 conda_command=$''
-if [ $using_conda ]; then
+if $using_conda; then
   conda_command=$'\nconda activate\nconda activate \\$working_directory/../code/python/.conda/'
 fi
 
