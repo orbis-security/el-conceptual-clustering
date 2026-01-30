@@ -42,6 +42,11 @@ public class GreedyClustering implements ClusteringExtractor{
         double previousValue=-Double.MAX_VALUE;
 
         System.out.println(formattedTime() + "- Initial clustering size: " + currentClustering.size());
+        if (numberOfClusters.isPresent() && numberOfClusters.get() >= currentClustering.size()) {
+            System.out.print(formattedTime() + "- Nothing to do, at most " + numberOfClusters.get() + " clusters already");
+            return currentClustering;
+        }
+
         System.out.print(formattedTime() + "- Building the relative utility matrix");
         System.out.flush();
         Map<BisimulationNode, SortedSet<Pair<BisimulationNode,Double>>> comparisonMatrix = buildMatrix(currentClustering,evaluator);
@@ -58,7 +63,7 @@ public class GreedyClustering implements ClusteringExtractor{
         //System.out.println("Current value: "+currentValue);
 
         while((numberOfClusters.isEmpty() && currentValue>=previousValue) ||
-                (numberOfClusters.isPresent() && numberOfClusters.get()<=currentClustering.size())) {
+              (numberOfClusters.isPresent() && numberOfClusters.get()<=currentClustering.size())) {
 
             previousValue=currentValue;
 
