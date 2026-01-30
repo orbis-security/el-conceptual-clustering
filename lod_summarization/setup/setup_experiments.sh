@@ -142,7 +142,7 @@ else
 fi
 
 # If the expriment directory already exists, ask the user what to do
-git_hash=$(git rev-parse HEAD)
+git_hash="$(git rev-parse HEAD || echo "d9a8fda5352cb6f8499e02d615b03d5a2831d51d")"
 echo Creating directory from git hash: $git_hash
 if [ -d ../$git_hash/ ]; then
   echo Directory exists.
