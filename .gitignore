@@ -1,0 +1,14 @@
+*.jar
+*.class
+*.o
+*.nt
+*.bin
+*.owl
+/lod_summarization/external
+/lod_summarization/[0-9a-f][0-9a-f][0-9a-f]*[0-9a-f][0-9a-f][0-9a-f]
+*.log
+*.zip
+*.csv
+/bisimulation-graphs/target
+/ore*
+/pe-malware*
